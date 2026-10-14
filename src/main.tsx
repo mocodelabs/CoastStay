@@ -11,8 +11,15 @@ function MissingConfig() {
     <div style={{ fontFamily: 'system-ui', padding: 32, maxWidth: 560 }}>
       <h1>CoastStay is not configured</h1>
       <p>
-        Set <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_PUBLISHABLE_KEY</code> in <code>.env.local</code> (see{' '}
-        <code>.env.example</code>) and restart the dev server.
+        <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_PUBLISHABLE_KEY</code> were not set when this app was built.
+      </p>
+      <p>
+        <strong>Hosted (Vercel, Netlify…):</strong> add them in the project’s environment variables, then redeploy — the
+        values are built into the app, so a new build is required. See <code>docs/DEPLOYMENT.md</code> §6.
+      </p>
+      <p>
+        <strong>Local:</strong> put them in <code>.env.local</code> (see <code>.env.example</code>) and restart the dev
+        server.
       </p>
     </div>
   )
