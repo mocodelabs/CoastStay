@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input, NativeSelect, Textarea } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/primitives'
 import { useMemberOptions } from '@/features/workspace/members'
-import { AMENITY_SUGGESTIONS, KENYA_COASTAL_COUNTIES, PROPERTY_TYPE } from '@/lib/labels'
+import { AMENITY_SUGGESTIONS, KENYA_COUNTIES, PROPERTY_TYPE } from '@/lib/labels'
 import { ROLE_LABELS } from '@/lib/permissions'
 import { cn } from '@/lib/utils'
 import { PROPERTY_TYPES, propertySchema, type PropertyFormValues } from '@/schemas/property'
@@ -93,7 +93,7 @@ export function PropertyForm({
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <Field label="Property name" error={errors.name?.message} required className="sm:col-span-2">
-            <Input placeholder="e.g. Diani Beach Villa" {...reg('name')} />
+            <Input placeholder="e.g. Kilimani Garden Apartment" {...reg('name')} />
           </Field>
           <Field label="Type" error={errors.property_type?.message}>
             <NativeSelect {...reg('property_type')}>
@@ -125,14 +125,14 @@ export function PropertyForm({
           <CardTitle>Location</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
-          <Field label="Area / location" hint="e.g. Diani, Nyali, Watamu" error={errors.location_name?.message}>
+          <Field label="Area / location" hint="e.g. Kilimani, Nyali, Naivasha" error={errors.location_name?.message}>
             <Input {...reg('location_name')} />
           </Field>
           <Field label="County" error={errors.county?.message}>
-            <Input list="coastal-counties" {...reg('county')} />
+            <Input list="county-suggestions" {...reg('county')} />
           </Field>
-          <datalist id="coastal-counties">
-            {KENYA_COASTAL_COUNTIES.map((c) => (
+          <datalist id="county-suggestions">
+            {KENYA_COUNTIES.map((c) => (
               <option key={c} value={c} />
             ))}
           </datalist>

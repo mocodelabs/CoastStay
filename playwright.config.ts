@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test'
+import { env } from './tests/integration/env'
 
 /**
  * End-to-end tests run the real app (Vite on port 5204) against the LOCAL Supabase stack, using a
@@ -6,6 +7,10 @@ import { defineConfig, devices } from '@playwright/test'
  * the run (tests/e2e/global-setup.ts). They refuse to run against non-local Supabase URLs.
  */
 const PORT = 5204
+
+if (!['127.0.0.1', 'localhost', '::1'].includes(new URL(env.url).hostname)) {
+  throw new Error('E2E tests only run against a local Supabase stack.')
+}
 
 export default defineConfig({
   testDir: 'tests/e2e',
@@ -33,6 +38,11 @@ export default defineConfig({
     url: `http://localhost:${PORT}`,
     reuseExistingServer: false,
     timeout: 120_000,
-    env: { VITE_APP_URL: `http://localhost:${PORT}` },
+    // Always the local stack, whatever .env.local points at (process env beats .env files in Vite).
+    env: {
+      VITE_APP_URL: `http://localhost:${PORT}`,
+      VITE_SUPABASE_URL: env.url,
+      VITE_SUPABASE_PUBLISHABLE_KEY: env.publishableKey,
+    },
   },
 })

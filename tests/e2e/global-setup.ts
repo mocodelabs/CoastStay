@@ -50,6 +50,7 @@ export default async function globalSetup() {
     mkdirSync('tests/e2e/.auth', { recursive: true })
     writeFileSync(FIXTURE_FILE, JSON.stringify({ orgId: org.data, otherPropertyId: prop.data.id }))
   } finally {
-    await admin.from('platform_settings').update({ allow_self_service_orgs: false }).eq('id', true)
+    // Platform default since migration 21: anyone may sign up and start a trial.
+    await admin.from('platform_settings').update({ allow_self_service_orgs: true }).eq('id', true)
   }
 }

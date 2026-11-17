@@ -1,8 +1,10 @@
 # CoastStay
 
-Property management for short-stay and holiday rentals on the Kenyan Coast — properties and units,
+Subscription software for BNBs, Airbnbs, serviced apartments and holiday homes — properties and units,
 bookings and availability, guests, payments and expenses, housekeeping, maintenance, inventory,
-guest messaging and reports.
+guest messaging and reports. Every business starts with a 14-day free trial, then a monthly
+(KES 2,999) or annual (KES 32,900) plan; see docs/DEPLOYMENT.md §4.1. Signed-out visitors see the public
+landing page at `/welcome`.
 
 **Stack:** React 19 · Vite · TypeScript (strict) · Tailwind CSS 4 · Radix primitives · React Router ·
 TanStack Query · React Hook Form + Zod · Recharts · date-fns · Supabase (Postgres, Auth, RLS, Storage).
@@ -28,7 +30,7 @@ Requirements: Node 22+, Docker Desktop.
 npm install
 npx supabase start          # local Postgres/Auth/Storage in Docker (first run downloads images)
 cp .env.example .env.local  # then paste the publishable key from `npx supabase status`
-npm run dev                 # http://localhost:5203
+npm run dev                 # http://localhost:5207
 ```
 
 Local Supabase ports are moved to the **5632x** range (API `56321`, DB `56322`, Mailpit `56324`)
@@ -37,7 +39,7 @@ because Windows/Hyper-V reserves 54296–54395 on this machine. Studio and Realt
 
 ### First run
 
-1. Open http://localhost:5203 and **Create an account**.
+1. Open http://localhost:5207 and **Create an account**.
 2. The first account on a fresh database may create the business (it becomes the owner). Afterwards,
    creating further businesses is disabled (`platform_settings.allow_self_service_orgs`), and new
    people join through **Settings → Staff & access → Invite staff**.
@@ -62,7 +64,7 @@ Password-reset and confirmation emails are captured locally by Mailpit at http:/
 
 | Script | Purpose |
 |---|---|
-| `npm run dev` | Vite dev server on port 5203 |
+| `npm run dev` | Vite dev server on port 5207 |
 | `npm run typecheck` | TypeScript (app + tests) |
 | `npm run lint` | oxlint |
 | `npm test` | Unit tests (pure logic) |

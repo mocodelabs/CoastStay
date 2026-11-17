@@ -1,4 +1,4 @@
-import { BellRing, Building, CalendarCog, ClipboardList, MessageSquareText, Plug, Receipt, UserRound, Users } from 'lucide-react'
+import { BellRing, Building, CalendarCog, ClipboardList, MessageSquareText, Plug, Receipt, UserRound, Users, CreditCard } from 'lucide-react'
 import { NavLink, Outlet } from 'react-router'
 import { PageHeader } from '@/components/layout/page-header'
 import { useOrg } from '@/features/workspace/workspace-provider'
@@ -15,6 +15,7 @@ const SECTIONS: Array<{ to: string; label: string; icon: typeof Building; perm?:
   { to: '/settings/expenses', label: 'Expense categories', icon: Receipt, perm: 'org.settings' },
   { to: '/settings/notifications', label: 'Notifications', icon: BellRing, perm: 'org.settings' },
   { to: '/settings/integrations', label: 'Integrations', icon: Plug, perm: 'integrations.manage' },
+  { to: '/settings/billing', label: 'Billing', icon: CreditCard, perm: 'billing.manage' },
 ]
 
 export function SettingsLayout() {

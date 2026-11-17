@@ -18,6 +18,7 @@
     "db:types": "supabase gen types typescript --local > src/types/database.ts",
     "seed:dev": "node scripts/seed-dev.mjs",
     "hosting:config": "node scripts/hosting-config.ts",
+    "brochure:pdf": "node scripts/brochure-pdf.mjs",
     "functions:serve": "supabase functions serve"
   },
   "dependencies": {

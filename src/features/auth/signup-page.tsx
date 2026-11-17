@@ -69,7 +69,7 @@ export function SignupPage() {
   return (
     <AuthLayout
       title="Create your account"
-      subtitle="Set up CoastStay for your business, or join with a staff invitation."
+      subtitle="Start your 14-day free trial — no card needed. Joining a team? Use the email your invitation was sent to."
     >
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" noValidate>
         <FormError message={formError} />

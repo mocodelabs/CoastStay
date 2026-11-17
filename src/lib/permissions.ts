@@ -11,6 +11,7 @@ export const PERMISSIONS = [
   'staff.manage',
   'audit.view',
   'integrations.manage',
+  'billing.manage',
   'property.view',
   'property.create',
   'property.edit',

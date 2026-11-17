@@ -31,10 +31,10 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
-  server: { port: 5203, strictPort: true },
+  server: { port: 5207, strictPort: true },
   // `npm run preview` serves the production build with the production security headers, pointed
   // at whichever Supabase URL the build uses, so CSP problems show up before deploying.
-  preview: { port: 5203, headers: securityHeaders(supabaseOrigins(loadEnv(mode, process.cwd(), 'VITE_').VITE_SUPABASE_URL)) },
+  preview: { port: 5205, headers: securityHeaders(supabaseOrigins(loadEnv(mode, process.cwd(), 'VITE_').VITE_SUPABASE_URL)) },
   build: {
     sourcemap: false,
     rollupOptions: {

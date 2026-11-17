@@ -24,6 +24,8 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
   const location = useLocation()
   if (loading) return <FullPageSpinner />
   if (!user) {
+    // The bare site address shows the public landing page; deep links go to sign-in and come back.
+    if (location.pathname === '/' && !location.search) return <Navigate to="/welcome" replace />
     const next = location.pathname + location.search
     return <Navigate to={`/login${next && next !== '/' ? `?next=${encodeURIComponent(next)}` : ''}`} replace />
   }

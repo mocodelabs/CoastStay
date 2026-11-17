@@ -3,7 +3,7 @@
 
 with checks(check_name, ok, detail) as (
   select 'migrations applied',
-         (select count(*) from supabase_migrations.schema_migrations) >= 20,
+         (select count(*) from supabase_migrations.schema_migrations) >= 21,
          (select count(*) || ' recorded, latest ' || max(version) from supabase_migrations.schema_migrations)
   union all
   select 'pg_cron enabled',
@@ -30,8 +30,20 @@ with checks(check_name, ok, detail) as (
                        and not exists (select 1 from unnest(coalesce(p.proconfig, '{}')) c where c like 'search_path=%')),
          null
   union all
-  select 'self-service businesses disabled',
-         not (select allow_self_service_orgs from public.platform_settings where id), null
+  select 'self-service sign-up enabled (subscription model)',
+         (select allow_self_service_orgs from public.platform_settings where id), null
+  union all
+  select 'a platform administrator exists',
+         exists (select 1 from public.platform_admins),
+         'needed to approve subscription payments'
+  union all
+  select 'every business has a subscription',
+         not exists (select 1 from public.organizations o
+                     where not exists (select 1 from public.subscriptions s where s.organization_id = o.id)), null
+  union all
+  select 'plan prices',
+         (select count(*) from public.subscription_plans) = 2,
+         (select string_agg(code || ' ' || price, ', ' order by sort_order) from public.subscription_plans)
   union all
   select 'bootstrap owner reserved (or business exists)',
          exists (select 1 from public.organizations)

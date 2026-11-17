@@ -45,7 +45,8 @@ export async function cleanup() {
     const del = await admin.auth.admin.deleteUser(id)
     if (del.error) throw new Error(`cleanup: deleting user ${id} failed: ${del.error.message}`)
   }
-  await admin.from('platform_settings').update({ allow_self_service_orgs: false }).eq('id', true)
+  // Restore the platform default (self-service sign-up with a trial, migration 21).
+  await admin.from('platform_settings').update({ allow_self_service_orgs: true }).eq('id', true)
 }
 
 export async function setup() {

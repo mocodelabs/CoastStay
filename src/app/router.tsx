@@ -1,4 +1,4 @@
-import { lazy } from 'react'
+import { lazy, Suspense } from 'react'
 import type * as React from 'react'
 import { createBrowserRouter, Navigate } from 'react-router'
 import { AppShell } from '@/components/layout/app-shell'
@@ -9,7 +9,7 @@ import { SignupPage } from '@/features/auth/signup-page'
 import { OnboardingPage } from '@/features/onboarding/onboarding-page'
 import type { Permission } from '@/lib/permissions'
 import { NotFound, RouteError } from './route-error'
-import { RequireAuth, RequireOrg, RequirePermission } from './guards'
+import { FullPageSpinner, RequireAuth, RequireOrg, RequirePermission } from './guards'
 
 /** Lazy-load a named export so each module ships as its own chunk. */
 function page<M, K extends keyof M>(loader: () => Promise<M>, name: K) {
@@ -47,6 +47,9 @@ const AutomationSettings = page(() => import('@/features/settings/automation-set
 const IntegrationSettings = page(() => import('@/features/settings/automation-settings'), 'IntegrationSettings')
 const ReportsPage = page(() => import('@/features/reports/reports-page'), 'ReportsPage')
 const MessagesPage = page(() => import('@/features/comms/messages-page'), 'MessagesPage')
+const BillingSettings = page(() => import('@/features/settings/billing-settings'), 'BillingSettings')
+const LandingPage = page(() => import('@/features/landing/landing-page'), 'LandingPage')
+const PlatformPage = page(() => import('@/features/platform/platform-page'), 'PlatformPage')
 
 function guard(anyOf: Permission[], element: React.ReactNode) {
   return <RequirePermission anyOf={anyOf}>{element}</RequirePermission>
@@ -56,6 +59,14 @@ export const router = createBrowserRouter([
   {
     errorElement: <RouteError />,
     children: [
+      {
+        path: '/welcome',
+        element: (
+          <Suspense fallback={<FullPageSpinner />}>
+            <LandingPage />
+          </Suspense>
+        ),
+      },
       { path: '/login', element: <LoginPage /> },
       { path: '/signup', element: <SignupPage /> },
       { path: '/forgot-password', element: <ForgotPasswordPage /> },
@@ -66,6 +77,16 @@ export const router = createBrowserRouter([
         element: (
           <RequireAuth>
             <OnboardingPage />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: '/platform',
+        element: (
+          <RequireAuth>
+            <Suspense fallback={<FullPageSpinner />}>
+              <PlatformPage />
+            </Suspense>
           </RequireAuth>
         ),
       },
@@ -114,6 +135,7 @@ export const router = createBrowserRouter([
               { path: 'expenses', element: guard(['org.settings'], <FinanceSettings />) },
               { path: 'notifications', element: guard(['org.settings'], <AutomationSettings />) },
               { path: 'integrations', element: guard(['integrations.manage'], <IntegrationSettings />) },
+              { path: 'billing', element: guard(['billing.manage'], <BillingSettings />) },
             ],
           },
           { path: '*', element: <NotFound /> },

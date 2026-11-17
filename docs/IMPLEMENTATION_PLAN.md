@@ -30,6 +30,7 @@ React Hook Form 7 + Zod 4 · Recharts 3 · date-fns 4 · Lucide · Sonner toasts
 | D | Dashboard, reports, notifications, message templates & WhatsApp hand-off, scheduled jobs, iCal sync | done (2026-10-13) |
 | E | QA: lint, typecheck, unit/integration/e2e, responsive, RLS & secrets review | done (2026-10-13) |
 | F | Deployment docs, env, backups, rollback, clean-checkout verification | done (2026-10-13) |
+| G | Subscriptions (trial + monthly/annual), universal BNB positioning, landing page, brochure | done (2026-11-17) |
 
 ## Database relationship overview
 
@@ -265,6 +266,39 @@ secrets in source/bundle; npm audit clean. All 19 migrations rebuilt from an emp
 **Configuration needed for production** — see `docs/DEPLOYMENT.md` §2–6: Supabase project, pg_cron +
 pg_net, auth URLs + email confirmation + SMTP, `db push`, `bootstrap_owner_email`, `ICAL_SYNC_SECRET` +
 function deploy + schedule script, host env vars. Nothing has been deployed to a hosted project.
+
+## Phase G report (2026-11-17) — subscriptions and universal positioning
+
+**Implemented**
+- Migration 21: `subscription_plans` (monthly KES 2,999 / annual KES 32,900), one `subscriptions` row per
+  business created by a trigger at sign-up (14-day trial), `subscription_payment_requests`,
+  `platform_admins`, `billing.manage` permission (owners). State is derived from dates
+  (active → trialing → expired). Self-service sign-up is now on.
+- Read-only mode: a trigger on 23 operational tables blocks user writes once a business has expired
+  (hint `subscription_inactive`, message shown as-is in the app). Reads, staff management, renewal,
+  system jobs and business deletion keep working.
+- Manual payment flow (no provider integration): owner submits an M-Pesa/bank reference
+  (`request_subscription_payment`, idempotent, a reference can't be claimed twice); a platform admin
+  approves/rejects on `/platform` (`review_subscription_payment`), which extends from the later of today,
+  trial end or current period end and notifies the owners.
+- UI: Settings → Billing (plans, payment instructions, reference form, history), trial/expiry banner on
+  every page, Platform billing console, public landing page at `/welcome` (signed-out `/` lands there),
+  sign-up/onboarding copy mentions the trial.
+- Positioning: copy changed from "coastal/holiday homes" to BNBs, Airbnbs, serviced apartments and holiday
+  homes anywhere; county suggestions now all 47 Kenyan counties. Product name unchanged.
+- Brochure rewritten (universal audience, pricing, trial; `npm run brochure:pdf` regenerates the PDF).
+- E2E safety: Playwright now forces the local Supabase URL/key, so a `.env.local` pointed at production can
+  never be used by tests. Dev server moved to port 5207 (5203 is used by another project).
+
+**Tested**: 13 new integration tests (prices match the UI, trial start, member/owner visibility,
+read-only enforcement, renewal while expired, deletion while expired, owner-only + idempotent requests,
+reference uniqueness across businesses, no direct client writes, admin-only review, approval from expiry,
+early payment keeps trial days, rejection). 3 new e2e tests (landing page incl. axe audit, trial → submit
+→ admin approve → active, expired business read-only).
+
+**Configuration needed for production**: `npx supabase db push` (migration 21) *before* the new frontend
+deploys; add yourself to `platform_admins` and set `billing_instructions` (DEPLOYMENT.md §4.1).
+Existing businesses receive a fresh 14-day trial from the moment the migration runs.
 
 ## Definition of done (master prompt §26)
 

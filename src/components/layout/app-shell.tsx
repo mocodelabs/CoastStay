@@ -1,5 +1,5 @@
 import { Dialog as DialogPrimitive } from 'radix-ui'
-import { Check, ChevronsLeft, ChevronsRight, ChevronsUpDown, LogOut, Menu, MoreHorizontal, UserRound } from 'lucide-react'
+import { Check, ChevronsLeft, ChevronsRight, ChevronsUpDown, LogOut, Menu, MoreHorizontal, ShieldCheck, UserRound } from 'lucide-react'
 import { Suspense, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router'
 import { Button } from '@/components/ui/button'
@@ -14,6 +14,8 @@ import {
 } from '@/components/ui/menu'
 import { Avatar } from '@/components/ui/primitives'
 import { useAuth } from '@/features/auth/auth-provider'
+import { useIsPlatformAdmin } from '@/features/billing/api'
+import { SubscriptionBanner } from '@/features/billing/subscription-banner'
 import { useOrg } from '@/features/workspace/workspace-provider'
 import { ROLE_LABELS } from '@/lib/permissions'
 import { cn } from '@/lib/utils'
@@ -91,6 +93,7 @@ function UserMenu({ compact }: { compact?: boolean }) {
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
   const name = (user?.user_metadata?.full_name as string | undefined) || user?.email || 'Account'
+  const platformAdmin = useIsPlatformAdmin(Boolean(user))
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -110,6 +113,11 @@ function UserMenu({ compact }: { compact?: boolean }) {
         <DropdownMenuItem onSelect={() => navigate('/settings/profile')}>
           <UserRound /> My profile
         </DropdownMenuItem>
+        {platformAdmin.data && (
+          <DropdownMenuItem onSelect={() => navigate('/platform')}>
+            <ShieldCheck /> Platform billing
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onSelect={async () => {
@@ -227,6 +235,7 @@ export function AppShell() {
 
       <div className={cn('transition-[padding]', collapsed ? 'lg:pl-[4.5rem]' : 'lg:pl-64')}>
         <main id="main" className="mx-auto w-full max-w-7xl px-4 pt-5 pb-28 sm:px-6 lg:px-8 lg:pt-8 lg:pb-12">
+          <SubscriptionBanner />
           <Suspense fallback={<PageSkeleton />}>
             <Outlet />
           </Suspense>

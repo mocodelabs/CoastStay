@@ -9,7 +9,7 @@ hosted-only steps (dashboard settings, billing-dependent backups) are marked **h
 | Piece | Where | Source |
 |---|---|---|
 | Web app (static SPA) | Vercel, Netlify or Cloudflare Pages | `npm run build` → `dist/` |
-| Database, Auth, Storage | One Supabase project per environment | `supabase/migrations/*` (20 files) |
+| Database, Auth, Storage | One Supabase project per environment | `supabase/migrations/*` (21 files) |
 | Calendar sync | Supabase Edge Function `ical-sync` | `supabase/functions/ical-sync` |
 | Reminders | pg_cron job `coaststay-reminders` (every 30 min) | created by migration 16 |
 | Calendar sync schedule | pg_cron job `coaststay-ical-sync` (hourly) | `supabase/production/schedule-ical-sync.sql` |
@@ -108,10 +108,53 @@ that window *before* the URL is public. In the SQL editor:
 update public.platform_settings set bootstrap_owner_email = 'admin@example.co.ke';
 ```
 
-Only that email address, once confirmed, can create the first business (migration 20). Everyone else
-sees "ask the owner to invite you". After the business exists this setting has no further effect, and
-creating additional businesses stays disabled (`platform_settings.allow_self_service_orgs = false`).
-`platform_settings` has no client policies, so neither value can be read or changed from the browser.
+Only that email address, once confirmed, can create the first business (migration 20). After the first
+business exists this setting has no further effect. From migration 21 CoastStay is a subscription
+service: anyone may then sign up and create their own business, which starts a 14-day trial
+(`platform_settings.allow_self_service_orgs = true`; set it to `false` to run a private, invite-only
+deployment). `platform_settings` has no client policies, so none of these values can be read or
+changed from the browser.
+
+### 4.1 Subscriptions and billing (migration 21)
+
+| Item | Value |
+|---|---|
+| Trial | 14 days from business creation (`platform_settings.trial_days`) |
+| Monthly plan | KES 2,999 per month |
+| Annual plan | KES 32,900 per year (saves KES 3,088) |
+| Prices | `public.subscription_plans` — change both the table and `src/lib/plans.ts` (a test compares them) |
+| After expiry | The business is **read-only**: people can sign in, view and export, manage staff and renew; nothing operational can be added or changed. No data is deleted. |
+
+**How payment works.** The owner pays by M-Pesa or bank transfer, then enters the transaction reference
+in **Settings → Billing**. A **platform administrator** (you, the operator) checks the reference against
+the M-Pesa statement or bank account and approves it on the **/platform** page. Approval extends the
+business by one plan period from whichever is later: today, the end of the trial or the end of the
+current paid period, so paying early never loses days. The owner is notified in the app. CoastStay never
+claims a payment was verified automatically; there is no payment-provider integration.
+
+**Make yourself platform administrator** (SQL editor, once, after signing up):
+
+```sql
+insert into public.platform_admins (user_id)
+select id from auth.users where email = 'mocodelabs@gmail.com';
+```
+
+Your account menu then shows **Platform billing** (`/platform`): every business with its trial or plan
+state, and the payment confirmations waiting for review.
+
+**Payment details shown to owners** (edit to your real Paybill/Till/bank details):
+
+```sql
+update public.platform_settings set billing_instructions =
+  'Pay by M-Pesa to Paybill 000000, account: your business name, or by bank transfer to … Then enter the M-Pesa or bank reference below.';
+```
+
+**Manual adjustments** (e.g. a goodwill extension), in the SQL editor:
+
+```sql
+update public.subscriptions set trial_ends_at = trial_ends_at + interval '7 days'
+where organization_id = (select id from public.organizations where name = 'Business name');
+```
 
 ## 5. Calendar sync Edge Function
 
@@ -207,7 +250,8 @@ is sent automatically.
 
 ## 8. Go-live verification
 
-1. Run `supabase/production/verify.sql` in the SQL editor (read-only). Every row should be `ok`; the
+1. Run `supabase/production/verify.sql` in the SQL editor (read-only). Every row should be `ok`
+   (including "a platform administrator exists", see §4.1); the
    calendar-sync rows may say `CHECK` until §5 is done, and "reminders ran" until 30 min after deploy.
 2. Smoke test on the live URL with a throwaway property, then delete or archive it:
    - Sign in as owner; create a property and a booking; record a deposit; see the balance update.

@@ -108,11 +108,11 @@ export function OnboardingPage() {
 
   const { errors } = form.formState
   return (
-    <AuthLayout title="Set up your business" subtitle="You’ll be the owner. You can change these details later in Settings.">
+    <AuthLayout title="Set up your business" subtitle="You’ll be the owner, and your 14-day free trial starts now. You can change these details later in Settings.">
       <form onSubmit={form.handleSubmit((v) => create.mutate(v))} className="space-y-4" noValidate>
         <FormError message={create.isError ? toUserMessage(create.error) : null} />
         <Field label="Business name" error={errors.name?.message} required>
-          <Input placeholder="e.g. Diani Shores Stays" autoComplete="organization" {...form.register('name')} />
+          <Input placeholder="e.g. Greenpark BNB" autoComplete="organization" {...form.register('name')} />
         </Field>
         <Field label="Business phone" error={errors.phone?.message} hint="Shown on booking confirmations.">
           <Input type="tel" inputMode="tel" placeholder="0712 345 678" {...form.register('phone')} />

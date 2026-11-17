@@ -26,6 +26,7 @@ Suspended members lose all access immediately.
 | `staff.manage` — invitations, roles, assignments | ✓ | | | |
 | `audit.view` — full audit log | ✓ | | | |
 | `integrations.manage` — calendar feeds (private URLs) | ✓ | | | |
+| `billing.manage` — subscription, plan choice, payment confirmations | ✓ | | | |
 | `property.view` | ✓ | ✓ | ✓ | ✓ |
 | `property.create` | ✓ | | | |
 | `property.edit` — details, units, photos, rates | ✓ | ✓ | | |
@@ -71,3 +72,15 @@ expenses and financial reports" (`organization_members.can_view_finances`).
   full-scope roles.
 - **Storage** paths are `<organization_id>/<entity_id>/<file>`; policies check the same permissions
   as the owning table. All buckets are private except `branding` (logos).
+
+## Subscriptions (migration 21)
+
+- Every member can see whether the business is on a trial, active or expired (`subscription_status`),
+  which drives the banner. Only owners (`billing.manage`) see payment requests and can submit one.
+- When the subscription has expired, a trigger on every operational table (bookings, payments, guests,
+  properties, tasks, stock, templates, settings…) rejects inserts, updates and deletes made by signed-in
+  users with the hint `subscription_inactive`. Reads are unaffected; membership, invitations and staff
+  assignments stay editable; system jobs (reminders, calendar sync) and business deletion are not blocked.
+- Platform administrators (`public.platform_admins`, managed with SQL) are a separate, cross-business
+  role: they can list every business's subscription and approve or reject payment confirmations, and
+  nothing else. They gain no access to any business's records.

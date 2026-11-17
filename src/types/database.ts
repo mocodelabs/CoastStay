@@ -835,16 +835,30 @@ isOneToOne: true
                   Relationships: [
                     
                   ]
-                },"platform_settings": {
+                },"platform_admins": {
                   Row: {
-                    "allow_self_service_orgs": boolean,"bootstrap_owner_email": string | null,"id": boolean,"updated_at": string
+                    "created_at": string,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "allow_self_service_orgs"?: boolean,"bootstrap_owner_email"?: string | null,"id"?: boolean,"updated_at"?: string
+                    "created_at"?: string,"user_id": string
                   }
                   Update: {
-                    "allow_self_service_orgs"?: boolean,"bootstrap_owner_email"?: string | null,"id"?: boolean,"updated_at"?: string
+                    "created_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"platform_settings": {
+                  Row: {
+                    "allow_self_service_orgs": boolean,"billing_instructions": string,"bootstrap_owner_email": string | null,"id": boolean,"trial_days": number,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "allow_self_service_orgs"?: boolean,"billing_instructions"?: string,"bootstrap_owner_email"?: string | null,"id"?: boolean,"trial_days"?: number,"updated_at"?: string
+                  }
+                  Update: {
+                    "allow_self_service_orgs"?: boolean,"billing_instructions"?: string,"bootstrap_owner_email"?: string | null,"id"?: boolean,"trial_days"?: number,"updated_at"?: string
                   }
                   Relationships: [
                     
@@ -1063,6 +1077,84 @@ isOneToOne: false
       referencedColumns: ["organization_id","user_id"]
     }
                   ]
+                },"subscription_payment_requests": {
+                  Row: {
+                    "amount": number,"id": string,"method": string,"organization_id": string,"period_end": string | null,"period_start": string | null,"plan": string,"reference": string,"review_note": string | null,"reviewed_at": string | null,"reviewed_by": string | null,"status": string,"submitted_at": string,"submitted_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "amount": number,"id"?: string,"method": string,"organization_id": string,"period_end"?: string | null,"period_start"?: string | null,"plan": string,"reference": string,"review_note"?: string | null,"reviewed_at"?: string | null,"reviewed_by"?: string | null,"status"?: string,"submitted_at"?: string,"submitted_by"?: string | null
+                  }
+                  Update: {
+                    "amount"?: number,"id"?: string,"method"?: string,"organization_id"?: string,"period_end"?: string | null,"period_start"?: string | null,"plan"?: string,"reference"?: string,"review_note"?: string | null,"reviewed_at"?: string | null,"reviewed_by"?: string | null,"status"?: string,"submitted_at"?: string,"submitted_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "subscription_payment_requests_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "subscription_payment_requests_plan_fkey"
+      columns: ["plan"]
+isOneToOne: false
+      referencedRelation: "subscription_plans"
+      referencedColumns: ["code"]
+    },{
+      foreignKeyName: "subscription_payment_requests_reviewed_by_fkey"
+      columns: ["reviewed_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "subscription_payment_requests_submitted_by_fkey"
+      columns: ["submitted_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"subscription_plans": {
+                  Row: {
+                    "code": string,"name": string,"period": string,"price": number,"sort_order": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "code": string,"name": string,"period": string,"price": number,"sort_order"?: number
+                  }
+                  Update: {
+                    "code"?: string,"name"?: string,"period"?: string,"price"?: number,"sort_order"?: number
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"subscriptions": {
+                  Row: {
+                    "created_at": string,"current_period_end": string | null,"organization_id": string,"plan": string | null,"trial_ends_at": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"current_period_end"?: string | null,"organization_id": string,"plan"?: string | null,"trial_ends_at": string,"updated_at"?: string
+                  }
+                  Update: {
+                    "created_at"?: string,"current_period_end"?: string | null,"organization_id"?: string,"plan"?: string | null,"trial_ends_at"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "subscriptions_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: true
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "subscriptions_plan_fkey"
+      columns: ["plan"]
+isOneToOne: false
+      referencedRelation: "subscription_plans"
+      referencedColumns: ["code"]
+    }
+                  ]
                 },"unit_occupancy": {
                   Row: {
                     "block_id": string | null,"booking_id": string | null,"created_at": string,"during": unknown,"id": string,"organization_id": string,"source_type": string,"unit_id": string
@@ -1171,6 +1263,9 @@ isOneToOne: false
 "anonymize_guest":
 { Args: { "target": string }; Returns: undefined
                            },
+"billing_instructions":
+{ Args: Record<PropertyKey, never>; Returns: string
+                           },
 "can_create_organization":
 { Args: Record<PropertyKey, never>; Returns: boolean
                            },
@@ -1205,11 +1300,24 @@ isOneToOne: false
               "booking_id": string,"booking_reference": string,"check_in_date": string,"check_out_date": string,"guest_count": number,"guest_first_name": string,"guest_requests": string,"property_id": string,"property_name": string,"status": Database["public"]['Enums']["booking_status"],"unit_id": string,"unit_name": string
             }[]
                            },
+"is_platform_admin":
+{ Args: Record<PropertyKey, never>; Returns: boolean
+                           },
 "my_permissions":
 { Args: { "org": string }; Returns: (string)[]
                            },
 "my_property_ids":
 { Args: { "org": string }; Returns: string[]
+                           },
+"platform_payment_requests":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "amount": number,"id": string,"method": string,"organization_id": string,"organization_name": string,"plan": string,"reference": string,"review_note": string,"reviewed_at": string,"status": string,"submitted_at": string,"submitted_by_email": string
+            }[]
+                           },
+"platform_subscriptions":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "created_at": string,"current_period_end": string,"organization_id": string,"organization_name": string,"owner_email": string,"pending_requests": number,"plan": string,"state": string,"trial_ends_at": string
+            }[]
                            },
 "report_monthly":
 { Args: { "first_month": string,"months": number,"org": string }; Returns: {
@@ -1221,9 +1329,40 @@ isOneToOne: false
               "accommodation_revenue": number,"available_nights": number,"blocked_nights": number,"occupied_nights": number,"operating_expenses": number,"payments_collected": number,"property_id": string,"property_name": string,"reservation_value": number,"unit_count": number
             }[]
                            },
+"request_subscription_payment":
+{ Args: { "org": string,"pay_method": string,"pay_reference": string,"plan_code": string }; Returns: string
+                           },
+"review_subscription_payment":
+{ Args: { "approve": boolean,"note"?: string,"request_id": string }; Returns: {
+              "amount": number,
+"id": string,
+"method": string,
+"organization_id": string,
+"period_end": string | null,
+"period_start": string | null,
+"plan": string,
+"reference": string,
+"review_note": string | null,
+"reviewed_at": string | null,
+"reviewed_by": string | null,
+"status": string,
+"submitted_at": string,
+"submitted_by": string | null
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "subscription_payment_requests"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
 "run_reminders":
 { Args: { "target_org"?: string }; Returns: {
               "messages": number,"notifications": number,"organization_id": string
+            }[]
+                           },
+"subscription_status":
+{ Args: { "org": string }; Returns: {
+              "can_manage": boolean,"current_period_end": string,"days_left": number,"pending_request": boolean,"plan": string,"state": string,"trial_ends_at": string
             }[]
                            },
 "sync_calendar_feed":
